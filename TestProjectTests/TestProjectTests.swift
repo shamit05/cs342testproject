@@ -17,7 +17,7 @@ struct TestProjectTests {
         #expect(patient.firstName == "Shamit")
         #expect(patient.lastName == "Surana")
         #expect(patient.age == 24)
-        #expect(patient.description == "Doe, John (24 years old)")
+        #expect(patient.description == "Surana, Shamit (24 years old)")
     }
 
     @Test("Add medication to patient test")
@@ -56,5 +56,22 @@ struct TestProjectTests {
         let patient = Patient(firstName: "John", lastName: "Doe", dateOfBirth: Date(), height: 180, weight: 75, bloodType: .ABPlus)
         #expect(patient.compatibleBloodTypes().count == BloodType.allCases.count)
     }
+    
+    @Test("Remaining days calculation test")
+       func remainingDaysTest() {
+           let today = Date()
 
+           // Create a medication prescribed today with a duration of 10 days
+           let medication = Medication(
+               datePrescribed: today,
+               name: "Aspirin",
+               dose: "81 mg",
+               route: "by mouth",
+               frequency: 1,
+               duration: 10
+           )
+
+           // Expect remaining days to be 9 initially
+           #expect(medication.remainingDays() == 9)
+       }
 }

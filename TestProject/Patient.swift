@@ -80,7 +80,7 @@ class Patient: CustomStringConvertible {
             .sorted(by: { $0.datePrescribed < $1.datePrescribed })
     }
 
-    // Get a list of compatible blood types for transfusion
+    // Bonus - Get a list of compatible blood types for transfusion
     func compatibleBloodTypes() -> [BloodType] {
         guard let bloodType = bloodType else { return [] }
 

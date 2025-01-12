@@ -26,4 +26,12 @@ struct Medication: CustomStringConvertible {
         let endDate = Calendar.current.date(byAdding: .day, value: duration, to: datePrescribed) ?? Date()
         return Date() > endDate
     }
+    
+    // Bonus function - calculate number of remaining days for the medication.
+    // Returns 0 if the course has already been completed.
+    func remainingDays() -> Int {
+        let endDate = Calendar.current.date(byAdding: .day, value: duration, to: datePrescribed) ?? Date()
+        let remaining = Calendar.current.dateComponents([.day], from: Date(), to: endDate).day ?? 0
+        return max(0, remaining)
+    }
 }
