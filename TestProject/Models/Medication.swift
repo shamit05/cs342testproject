@@ -7,12 +7,18 @@
 
 import Foundation
 
+enum Route: String, CaseIterable {
+    case byMouth
+    case subcutaneously
+    case inhaled
+}
+
 // Represents a medication prescribed to a patient
 struct Medication: CustomStringConvertible {
     let datePrescribed: Date
     let name: String
-    let dose: String
-    let route: String
+    let dose: Float // mg
+    let route: Route
     let frequency: Int
     let duration: Int
 

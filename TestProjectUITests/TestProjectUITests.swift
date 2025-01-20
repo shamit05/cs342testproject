@@ -4,40 +4,120 @@
 //
 //  Created by Shamit Surana on 1/9/25.
 //
-
 import XCTest
 
 final class TestProjectUITests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
 
-        // In UI tests it is usually best to stop immediately when a failure occurs.
-        continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+    func testPatientListDisplaysCorrectly() {
+        let app = XCUIApplication()
+        app.launch()
+        
+        let patientList = app.staticTexts["patientList"]
+        XCTAssertTrue(patientList.exists, "The patient list should be visible.")
+        
+        let firstPatient = app.staticTexts["John Doe"]
+        XCTAssertTrue(firstPatient.exists, "Patient 'John Doe' should be listed.")
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    func testSearchFiltersPatients() {
+        let app = XCUIApplication()
+        app.launch()
+        
+        let searchField = app.searchFields["Search"]
+        searchField.tap()
+        searchField.typeText("Doe")
+
+        let filteredPatient = app.staticTexts["John Doe"]
+        XCTAssertTrue(filteredPatient.exists, "The search results should include 'John Doe'.")
     }
 
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testNavigateToPatientDetailView() {
+        let app = XCUIApplication()
+        app.launch()
+        
+        let firstPatient = app.staticTexts["John Doe"]
+        firstPatient.tap()
+
+        let detailViewTitle = app.collectionViews["patientDetailView"]
+        XCTAssertTrue(detailViewTitle.exists, "Navigating to patient detail view should display the 'Patient Details' title.")
+    }
+
+    func testAddNewPatient() {
+        let app = XCUIApplication()
+        app.launch()
+        
+        let addButton = app.buttons["plus"]
+        addButton.tap()
+
+
+        // Fill in the new patient form
+        let firstNameField = app.textFields["firstNameField"]
+        firstNameField.tap()
+        firstNameField.typeText("George")
+
+        let lastNameField = app.textFields["lastNameField"]
+        lastNameField.tap()
+        lastNameField.typeText("Smith")
+        
+
+        let heightField = app.textFields["heightField"]
+        heightField.tap()
+        heightField.typeText("170")
+
+        let weightField = app.textFields["weightField"]
+        weightField.tap()
+        weightField.typeText("60000")
+
+        let saveButton = app.buttons["savePatientButton"]
+        saveButton.tap()
+
+        XCTAssertTrue(app.staticTexts["George Smith"].exists, "The new patient 'George Smith' should be listed.")
+    }
+    
+    func testAddMedication() {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        // Navigate to Patient Detail View
+        let patient = app.staticTexts["John Doe"]
+        XCTAssertTrue(patient.waitForExistence(timeout: 5), "Patient 'John Doe' should exist.")
+        patient.tap()
+
+        // Open Prescribe Medication View
+        let prescribeButton = app.buttons["prescribeMedicationButton"]
+        XCTAssertTrue(prescribeButton.waitForExistence(timeout: 5), "The 'Prescribe Medication' button should exist.")
+        prescribeButton.tap()
+
+
+        // Interact with TextFields
+        let nameField = app.textFields["medicationNameField"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5), "The 'Medication Name' field should exist.")
+        nameField.tap()
+        nameField.typeText("Ibuprofen")
+
+        let doseField = app.textFields["medicationDoseField"]
+        XCTAssertTrue(doseField.waitForExistence(timeout: 5), "The 'Dose' field should exist.")
+        doseField.tap()
+        doseField.typeText("200")
+
+        let frequencyField = app.textFields["medicationFrequencyField"]
+        frequencyField.tap() // Ensure the field has focus
+        frequencyField.typeText("3")
+
+        let durationField = app.textFields["medicationDurationField"]
+        durationField.tap() // Ensure the field has focus
+        durationField.typeText("7")
+
+        // Save the medication
+        let saveButton = app.buttons["medicationSaveButton"]
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 5), "The 'Save' button should exist.")
+        saveButton.tap()
+
+        // Verify medication appears in the list
+        let medicationName = app.staticTexts["Ibuprofen"]
+        XCTAssertTrue(medicationName.waitForExistence(timeout: 5), "The new medication 'Ibuprofen' should appear in the patient's medication list.")
     }
 
-    @MainActor
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
-    }
+
 }

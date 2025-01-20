@@ -6,36 +6,41 @@
 //
 
 import Foundation
+import Observation
 
-// Patient class representing a medical record of a patient
-class Patient: CustomStringConvertible {
-    // Static property tracks medical record numbers
-    private static var currentRecordNumber = 0
 
+// Patient representing a medical record of a patient
+struct Patient: CustomStringConvertible, Identifiable {
     // Patient properties
-    let medicalRecordNumber: Int
+    let id: UUID
+    let medicalRecordNumber: UUID
     let firstName: String
     let lastName: String
     let dateOfBirth: Date
-    var height: Double // Height in cm
-    var weight: Double // Weight in kg
+    var height: Int // Height in cm
+    var weight: Int // Weight in g
     var bloodType: BloodType?
 
     // List of medications the patient has been prescribed
-    private(set) var medications: [Medication]
+    var medications: [Medication]
 
     // Initializer for the Patient class
     init(
         firstName: String,
         lastName: String,
         dateOfBirth: Date,
-        height: Double,
-        weight: Double,
+        height: Int,
+        weight: Int,
         bloodType: BloodType? = nil
-    ) {
+    ) throws {
+        // Validate that the date of birth is not in the future
+        guard dateOfBirth <= Date() else {
+            throw PatientError.futureDateOfBirth;
+        }
+        
         // Auto-generate unique medical record number
-        Self.currentRecordNumber += 1
-        self.medicalRecordNumber = Self.currentRecordNumber
+        self.id = UUID()
+        self.medicalRecordNumber = UUID()
 
         // Assign properties
         self.firstName = firstName
@@ -60,14 +65,10 @@ class Patient: CustomStringConvertible {
     }
 
     // Add a medication to the patient's record
-    func addMedication(_ medication: Medication) throws {
+    mutating func addMedication(_ medication: Medication) throws {
         // Check if a duplicate active medication already exists
         if medications.contains(where: { $0.name == medication.name && !$0.isCompleted }) {
-            throw NSError(
-                domain: "PatientError",
-                code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Duplicate active medication."]
-            )
+            throw PatientError.duplicateMedicine
         }
         // Add the new medication
         medications.append(medication)
@@ -79,20 +80,20 @@ class Patient: CustomStringConvertible {
             .filter { !$0.isCompleted }
             .sorted(by: { $0.datePrescribed < $1.datePrescribed })
     }
+}
 
-    // Bonus - Get a list of compatible blood types for transfusion
-    func compatibleBloodTypes() -> [BloodType] {
-        guard let bloodType = bloodType else { return [] }
-
-        switch bloodType {
-        case .OPlus: return [.OPlus, .OMinus]
-        case .OMinus: return [.OMinus]
-        case .APlus: return [.APlus, .AMinus, .OPlus, .OMinus]
-        case .AMinus: return [.AMinus, .OMinus]
-        case .BPlus: return [.BPlus, .BMinus, .OPlus, .OMinus]
-        case .BMinus: return [.BMinus, .OMinus]
-        case .ABPlus: return BloodType.allCases
-        case .ABMinus: return [.ABMinus, .AMinus, .BMinus, .OMinus]
+@Observable
+class PatientManager {
+    var patients: [Patient] = []
+    
+    init() {
+        do {
+           patients = [
+                try Patient(firstName: "John", lastName: "Doe", dateOfBirth: Date(), height: 180, weight: 75000, bloodType: .oPlus),
+                try Patient(firstName: "Jane", lastName: "Smith", dateOfBirth: Date(), height: 165, weight: 65000, bloodType: .aMinus)
+            ]
+        } catch {
+            patients = []
         }
     }
 }
